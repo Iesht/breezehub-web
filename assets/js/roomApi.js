@@ -50,7 +50,7 @@ function transformRoomDetail(room) {
       temperature: dev.sensors.length
         ? Math.round(dev.sensors.reduce((sum, s) => sum + s.temperature, 0) / dev.sensors.length)
         : 0,
-      isOn: true,
+      isOn: dev.mod !== "off",
       hasTimer: false,
     })),
     sensors: allSensors.map(s => ({

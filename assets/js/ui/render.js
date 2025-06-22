@@ -4,6 +4,7 @@
 import {openMain, showWindow} from "../navigation.js";
 import {buttons, updateHeader} from "../header.js";
 import {openDeviceControlModal} from "../modal.js";
+import { powerDevice } from "../deviceApi.js";
 
 export function renderRooms(rooms, onSettingsClick) {
   const listContainer = document.getElementById('rooms-list');
@@ -123,26 +124,48 @@ function adjustAllButtons() {
 document.addEventListener('DOMContentLoaded', adjustAllButtons);
 
 // Устройства
-function createDeviceCard(dev){
-  const card=document.createElement('div');
-  card.className='card';
-  card.innerHTML=`
-      <div class="title">${dev.name}</div>
-      <div class="menu"><i class="fa-solid fa-ellipsis"></i></div>
-      <div class="pill">
-        <div class="left"><i class="fa-solid fa-temperature-half"></i>${dev.temperature}°C</div>
-        <div class="knob"></div>
-        <div class="right" style="display:flex;align-items:center;gap:12px;">
-          ${dev.hasTimer ? '<img src="/assets/images/icons/mdi--clipboard-text-time-outline.svg" alt="По расписанию"></img>' : ''}
-          <div class="toggle ${dev.isOn ? '' : 'off'}" tabindex="0"></div>
-        </div>
-      </div>`;
+function createDeviceCard(dev) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="title">${dev.name}</div>
+    <div class="menu"><i class="fa-solid fa-ellipsis"></i></div>
+    <div class="pill">
+      <div class="left">
+        <i class="fa-solid fa-temperature-half"></i>${dev.temperature}°C
+      </div>
+      <div class="knob"></div>
+      <div class="right" style="display:flex;align-items:center;gap:12px;">
+        ${dev.hasTimer ? '<img src="/assets/images/icons/mdi--clipboard-text-time-outline.svg" alt="По расписанию">' : ''}
+        <div class="status-label">${dev.isOn ? 'ON' : 'OFF'}</div>
+        <div class="toggle ${dev.isOn ? '' : 'off'}" tabindex="0"></div>
+      </div>
+    </div>`;
 
-  const toggle=card.querySelector('.toggle');
-  toggle.addEventListener('click',()=>{
-    toggle.classList.toggle('off');
-    const lbl=toggle.previousElementSibling;
-    lbl.textContent=toggle.classList.contains('off')?'OFF':'ON';
+  const toggle = card.querySelector('.toggle');
+  const statusLabel = card.querySelector('.status-label');
+
+  toggle.addEventListener('click', async () => {
+    // Блокируем переключение во время запроса
+    toggle.classList.add('disabled');
+    const prevState = dev.isOn;
+    const newState = !prevState;
+
+    // Обновим UI "на глаз" — feel fast
+    updateToggleUI(toggle, statusLabel, newState);
+
+    try {
+      const token = localStorage.getItem('token');
+      dev.isOn = newState;
+      await powerDevice(token, dev); // если ошибка — попадем в catch
+    } catch (e) {
+      // Если ошибка — вернуть в предыдущее состояние
+      console.error("Ошибка при переключении устройства:", e);
+      dev.isOn = prevState;
+      updateToggleUI(toggle, statusLabel, prevState);
+    } finally {
+      toggle.classList.remove('disabled');
+    }
   });
 
   const dotsBtn = card.querySelector('.menu');
@@ -153,6 +176,12 @@ function createDeviceCard(dev){
 
   return card;
 }
+
+function updateToggleUI(toggle, label, isOn) {
+  toggle.classList.toggle('off', !isOn);
+  label.textContent = isOn ? 'ON' : 'OFF';
+}
+
 
 function createSensorCard(s){
   const card=document.createElement('div');

@@ -37,7 +37,7 @@ export async function updateDevice(token, name, systemId, roomId, mod) {
 export async function assignDevice(token, device) {
     const myDevice = await getDeviceById(token, device.id);
     console.log(myDevice);
-    return await updateDevice(token, device.name, device.id, device.roomName, myDevice.mod)
+    return await updateDevice(token, myDevice.name, myDevice.id, device.roomName, myDevice.mod)
 }
 
 export async function getDeviceById(token, id) {
@@ -48,6 +48,13 @@ export async function getDeviceById(token, id) {
     name: data.name ?? `AC-${String(data.id).padStart(2, '0')}`,
     assigned: Boolean(data.roomId !== 0),
     roomName: data.roomName,
+    roomId: data.roomId,
     mod: Mode[data.mod]
   };
+}
+
+export async function powerDevice(token, device) {
+    const myDevice = await getDeviceById(token, device.id);
+    console.log(myDevice);
+    return await updateDevice(token, myDevice.name, myDevice.id, myDevice.roomId, device.isOn ? 2: 0)
 }

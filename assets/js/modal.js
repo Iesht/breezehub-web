@@ -131,6 +131,7 @@ export function openDeviceControlModal(dev) {
   powerToggle.addEventListener('click', () => {
     dev.power = !dev.power;
     powerToggle.classList.toggle('on');
+    console.log(dev);
     apiCall('/device/power', 'PUT', { id: dev.id, power: dev.power });
   });
 
