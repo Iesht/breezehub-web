@@ -1,5 +1,6 @@
 import { apiCall } from "./api.js";
 import { assignDevice, getDevices, changeModDevice } from './deviceApi.js';
+import { createRoom } from "./roomApi.js";
 
 // Create room, modal
 
@@ -40,7 +41,7 @@ function openCreateRoomModal() {
   `;
   document.body.appendChild(overlay);
 
-  overlay.querySelector('.save-btn').addEventListener('click', saveRoom);
+  overlay.querySelector('.save-btn').addEventListener('click', () => saveRoom(overlay));
   overlay.querySelector('.close-btn')
     .addEventListener('click', closeModal);
   overlay.querySelector('#roomList').addEventListener('click', function(e) {
@@ -50,23 +51,23 @@ function openCreateRoomModal() {
   });
 }
 
-function saveRoom() {
+async function saveRoom(overlay) {
   const roomName = document.getElementById('roomNameInput').value.trim();
   if (!roomName) {
     alert('Введите название комнаты!');
     return;
   }
 
-  console.log(`TODO: Отправка на сервер: ${roomName}`);
-
-  fetch('/api/rooms', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: roomName })
-  })
-    .then(() => alert(`Комната "${roomName}" сохранена! (заглушка)`))
-    .catch(() => alert('Ошибка сохранения (заглушка)'));
+  const token = localStorage.getItem('token');
+  try {
+    await createRoom(token, roomName);
+    overlay.remove(); // <-- Закрытие окна
+    location.reload();
+  } catch {
+    alert('Ошибка сохранения');
+  }
 }
+
 
 
 
@@ -299,6 +300,7 @@ async function toggleAssign(dev, tileEl) {
   
   const token = localStorage.getItem('token');
   await assignDevice(token, dev);
+  location.reload();
 }
 
 function createOverlay(htmlInner){

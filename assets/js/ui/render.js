@@ -197,20 +197,3 @@ function createSensorCard(s){
   return card;
 }
 
-function enableToggleKeyboard(){
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&document.activeElement.classList.contains('toggle')){
-      document.activeElement.click();
-    }
-  });
-}
-
-/* Добавление устройств/датчиков TODO */
-function wireAddButtons(){
-  document.getElementById('add-device-btn').addEventListener('click',()=>{
-    alert('TODO: форма добавления устройства');
-  });
-  document.getElementById('add-sensor-btn').addEventListener('click',()=>{
-    alert('TODO: форма добавления датчика');
-  });
-}

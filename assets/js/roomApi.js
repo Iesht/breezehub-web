@@ -93,3 +93,34 @@ function calculateHeaterLoad(temperature, co2) {
 
   return Math.round(Math.max(0, Math.min(100, heaterLoad)));
 }
+
+export async function createRoom(token, roomName) {
+  // 1. Получаем список существующих комнат
+  const existingRooms = await apiCall('/api/me/rooms', 'GET', token);
+  const existingIds = new Set(existingRooms.map(r => r.systemId));
+
+  // 2. Генерируем уникальный systemId от 1 до 1000
+  let newId;
+  do {
+    newId = Math.floor(Math.random() * 1000) + 1;
+  } while (existingIds.has(newId));
+
+  // 3. Готовим и отправляем тело запроса
+  const payload = [
+    {
+      name: roomName,
+      systemId: newId,
+    },
+  ];
+  await apiCall('/api/updateRooms', 'POST', token, payload);
+
+  // 4. Возвращаем краткий формат новой комнаты
+  return {
+    id: newId,
+    name: roomName,
+    temperature: 0,
+    co2: 0,
+    heaterLoad: calculateHeaterLoad(0, 0),
+    hasAlert: false,
+  };
+}
