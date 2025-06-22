@@ -8,7 +8,6 @@ import {
   getDeviceWithSchedules
 } from './scheduleApi.js';
 import { Mode } from './deviceApi.js';
-// Create room, modal
 
 let acDevices = [];
 
@@ -66,17 +65,13 @@ async function saveRoom(overlay) {
   const token = localStorage.getItem('token');
   try {
     await createRoom(token, roomName);
-    overlay.remove(); // <-- Закрытие окна
+    overlay.remove(); 
     location.reload();
   } catch {
     alert('Ошибка сохранения');
   }
 }
 
-
-
-
-// Devices, modal
 document.getElementById('add-device-btn').addEventListener('click', openDeviceModal);
 
 function openDeviceModal(){
@@ -100,8 +95,6 @@ function openDeviceModal(){
   overlay.addEventListener('click', e=>{ if(e.target===overlay)closeModal(); });
 }
 
-
-// Логика отрисовки устройств
 function renderDevices(gridId, list) {
   const grid = document.getElementById(gridId);
   if (!grid) {
@@ -127,26 +120,22 @@ function renderDevices(gridId, list) {
 export async function openDeviceControlModal(dev) {
   const overlay = createOverlay(getDeviceModalHTML(dev));
 
-  /* локальные ссылки */
+
   const powerToggle = overlay.querySelector('#togglePower');
   const roomBlock   = overlay.querySelector('#roomBlock');
 
   overlay.querySelector('#closeBtn').addEventListener('click', closeModal);
-  /* ——— 4.2 Вкл/выкл питание ——— */
 
-  /* ——— 4.4 Виджеты режима, температуры, графика ——— */
   console.log(dev);
   overlay.querySelectorAll('.mode-btn').forEach(btn => {
   const mode = btn.querySelector('span').textContent.trim();
 
-  // Устанавливаем активную кнопку при загрузке
   if (mode === dev.mod) {
     btn.classList.add('active');
   } else {
     btn.classList.remove('active');
   }
 
-  // Назначаем обработчик на клик
   btn.addEventListener('click', async () => {
     overlay.querySelector('.mode-btn.active')?.classList.remove('active');
     btn.classList.add('active');
@@ -155,7 +144,7 @@ export async function openDeviceControlModal(dev) {
     const token = localStorage.getItem('token');
     await changeModDevice(token, dev, newMode)
 
-    dev.mode = newMode; // Обновляем локально
+    dev.mode = newMode;
   });
 });
 
@@ -169,29 +158,24 @@ export async function openDeviceControlModal(dev) {
     });
   });
 
-  // Загрузка существующих расписаний для dev.id
 const token = localStorage.getItem('token');
 const fullDev = await getDeviceWithSchedules(token, dev.id);
 
 const addBtn   = overlay.querySelector('.add-btn');
   const editZone = overlay.querySelector('#schedule-edit-zone');
   const listZone = overlay.querySelector('.schedule-list');
-// fullDev.schedules — это массив { systemId, action, cron }
 fullDev.schedules.forEach(sch => {
-  // преобразуем cron обратно в "HH:MM"
   const [ , minute, hour ] = sch.cron.split(' ');
   const badge = document.createElement('span');
   badge.className = 'time-slot';
   badge.textContent = `${hour.padStart(2,'0')}:${minute.padStart(2,'0')}`;
   badge.onclick = async () => {
-    // по клику удаляем это расписание
     await removeSchedule(token, sch.systemId);
     badge.remove();
   };
   listZone.appendChild(badge);
 });
 
-  /* ——— 4.5 График (добавление интервалов) ——— */
   
   addBtn.addEventListener('click', () => createEditor());
 
@@ -219,9 +203,8 @@ const cronStart = `0 ${sm} ${sh} * * *`;
 const cronEnd   = `0 ${em} ${eh} * * *`;
 console.log(dev);
 await addSchedules(token, [
-  // включение в выбранном режиме dev.mod
   { systemId: dev.id, mod: Mode[dev.mod], cron: cronStart },
-  // выключение
+
   { systemId: dev.id, mod: Mode.off, cron: cronEnd }
 ]);
       slot.remove();
@@ -229,7 +212,6 @@ await addSchedules(token, [
     editZone.appendChild(slot);
   }
 
-  /* ——— 4.6 Коммутация чекбокса «По графику» ——— */
   overlay.querySelector('.schedule-header input')
   .addEventListener('change', async e => {
     const enabled = e.target.checked;
@@ -245,10 +227,8 @@ await addSchedules(token, [
   });
 
 
-  /* ——— 4.7 Авто-обновление фактической температуры ——— */
 
-  overlay.addEventListener('remove', () => clearInterval(tInt));   // сбросить таймер
-  /* ——— локальные генераторы блоков ——— */
+  overlay.addEventListener('remove', () => clearInterval(tInt));  
 }
 
 function ensureDeviceModalCSS() {
@@ -337,7 +317,6 @@ function getDeviceModalHTML(dev) {
   </div>`;
 }
 
-/* модалка со списком всех устройств */
 
 function showMenu(tileEl, dev) {
   const menu = document.createElement('div');

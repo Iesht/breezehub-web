@@ -1,5 +1,4 @@
 import {buttons, updateHeader} from "./header.js";
-import {animateHeaterLoads} from "./ui/animation.js";
 
 const windows = document.querySelectorAll("section");
 

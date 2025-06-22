@@ -1,11 +1,10 @@
-import { renderLoading, renderError, renderRoomDetail, renderRooms }
-  from '../ui/render.js';
-import {getRooms, getRoomById} from "../roomApi.js";
+import { renderLoading, renderError, renderRoomDetail, renderRooms } from '../ui/render.js';
+import { getRooms, getRoomById } from '../roomApi.js';
 
 class RoomStateClass {
   constructor() {
-    this.state = 'idle';  // 'idle' | 'loading' | 'success' | 'error'
-    this.data = null;  // комната или null
+    this.state = 'idle';
+    this.data = null;
     this.error = null;
   }
 
@@ -37,10 +36,6 @@ export async function loadAllRooms(token) {
 
   try {
     const rooms = await getRooms(token);
-    // const rooms = [
-    //   { id: 1, name: 'Гостиная', temperature: 22, co2: 450, heaterLoad: 60 },
-    //   { id: 2, name: 'Кухня',   temperature: 25, co2: 2000, heaterLoad: 30, hasAlert: true }
-    // ];
     roomState.setSuccess(rooms);
     renderRooms(roomState.data, roomId => loadRoomById(token, roomId));
     console.log('Rooms loaded:', rooms);
@@ -64,9 +59,6 @@ export async function loadRoomById(token, roomId) {
     await new Promise(resolve => setTimeout(resolve, 300));
     renderRoomDetail(room);
     console.log('Room loaded:', room);
-    // const room = await getRoomById(token, roomId);
-    // roomState.setSuccess(room);
-    // renderRoomDetail(roomState.data);
   } catch (e) {
     roomState.setError(e.message);
     console.error('Ошибка при загрузке комнаты:', e);
@@ -75,4 +67,3 @@ export async function loadRoomById(token, roomId) {
     renderLoading(false);
   }
 }
-

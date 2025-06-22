@@ -1,8 +1,4 @@
-// scheduleApi.js
-
 import { apiCall } from './api.js';
-import { Mode } from './deviceApi.js';  // ваше перечисление режимов
-
 
 export async function getDeviceWithSchedules(token, deviceId) {
   return await apiCall(`/api/me/devices/${deviceId}`, 'GET', token);
