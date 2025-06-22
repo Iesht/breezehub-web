@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Modern Climat Solution</title>
+
+    <!--
+      - css link
+    -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!--
+      - favicon
+    -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="./site.webmanifest">
+
+    <!--
+      - font link
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+
+<!--
+  - HEADER
+-->
+<header id="site-header">
+    <div class="logo">
+        <img class="logo-svg" src="./assets/images/logo/logo_orange.svg" alt="logo" style="height: 50px; width: 50px;">
+        Modern Climat Solution
+    </div>
+    <nav id="header-actions"></nav>
+</header>
+
+
+<div id="loading-overlay" class="hidden">
+    <div class="spinner"></div>
+</div>
+
+<div id="error-container" class="hidden">
+    <p id="error-message"></p>
+    <button id="error-close">Закрыть</button>
+</div>
+
+
+
+<!-- Список комнат, окно -->
+<section id="main-window">
+    <div class="field">
+        <h1 class="field__title">Комнаты</h1>
+
+        <template id="room-template">
+            <div class="room-card">
+                <h2 class="room-name"></h2>
+                <button class="room-settings" aria-label="Настройки комнаты">
+                    <img class="room-settings-icon" src="./assets/images/icons/ic--outline-settings.svg" alt="Настройки">
+                </button>
+
+                <div class="room-info">
+                    <div class="parameters">
+                        <div class="param temp"><img src="./assets/images/icons/fluent--temperature-20-regular.svg" alt=""> <span class="temperature"></span>°C</div>
+                        <div class="param co2"><img src="./assets/images/icons/iwwa--co2.svg" alt=""> <span class="co2-value"></span> ppm</div>
+                    </div>
+                    <div class="heater-load">
+                        <span>Нагрузка нагревателя</span>
+                        <div id="room-load-circle" class="load-circle"><span class="heater-percentage"></span></div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div id="rooms-list"></div>
+
+        <button id="create-room-button" class="floating-btn">
+            Создать новую комнату
+            <img src="./assets/images/icons/mdi--home-plus-outline.svg" alt="" class="btn-icon">
+        </button>
+    </div>
+</section>
+
+<!-- Авторизация, окно -->
+<section id="auth-window" class="hidden">
+    <div class="background" id="background"></div>
+    <div class="container">
+        <form id="auth-form" class="auth-form">
+            <h1>Авторизация</h1>
+            <label for="auth-login">Введите ключ</label>
+            <input type="text" id="auth-login" placeholder="" required/>
+            <button type="submit">Войти</button>
+            <div class="help">
+                <span>Нужна помощь? </span><a href="#">Связь с техподдержкой</a>
+            </div>
+        </form>
+    </div>
+    <div id="auth-error" style="color:red; display:none;"></div>
+</section>
+
+<!-- Комната, окно -->
+<section id="room-window" class="hidden">
+    <div class="field">
+        <div class="room-name-container">
+            <h2 id="room-name" class="field__title"></h2>
+            <button class="room-rename" aria-label="Переименование комнаты">
+                <img class="room-rename-icon" src="./assets/images/icons/mdi--pencil-outline.svg" alt="Переименовать">
+            </button>
+        </div>
+
+        <div class="room-info">
+            <div class="parameters">
+                <div class="param temp"><img src="./assets/images/icons/fluent--temperature-20-regular.svg" alt=""> <span id="room-temp" class="temperature"></span>°C</div>
+                <div class="param co2"><img src="./assets/images/icons/iwwa--co2.svg" alt=""> <span id="room-co2" class="co2-value"></span> ppm</div>
+            </div>
+            <div class="heater-load">
+                <span>Нагрузка нагревателя</span>
+                <div class="load-circle"><span id="room-load" class="heater-percentage"></span></div>
+            </div>
+        </div>
+
+        <div class="iot-panel" id="iot-panel">
+            <!-- Устройства -->
+            <div class="section-header">
+                <h3>Устройства</h3>
+                <button class="add-btn" id="add-device-btn" aria-label="Добавить устройство"><img src="/assets/images/icons/icons8--plus.svg" alt=""></img></button>
+            </div>
+            <div class="grid" id="devices"></div>
+
+            <!-- Датчики -->
+            <div class="section-header" style="margin-top:40px;">
+                <h3>Датчики</h3>
+                <button class="add-btn" id="add-sensor-btn" aria-label="Добавить датчик"><img src="/assets/images/icons/icons8--plus.svg" alt=""></img></button>
+            </div>
+            <div class="grid" id="sensors"></div>
+        </div>
+
+        <button id="room-back" class="floating-btn">
+            Назад
+            <img src="./assets/images/icons/mdi-light--arrow-left.svg" alt="" class="btn-icon">
+        </button>
+    </div>
+</section>
+
+<!-- Личный кабинет, окно -->
+<section id="profile-window" class="hidden">
+    <div class="profile-container">
+        <div class="field">
+
+            <div class="profile-main">
+                <div class="profile-avatar">
+                    <img width="75" height="75" src="https://i5.walmartimages.com/asr/80d1aa57-2de4-4be5-a644-8de1444e6e89.4b934c29803c8ae957d42572b9e946f1.jpeg?odnHeight=612&odnWidth=612&odnBg=FFFFFF" alt="Аватар"/>
+                </div>
+                <div class="profile-info">
+                    <h2 class="field__title">Разработчик:)</h2>
+                    <p class="profile_id">ID: admin</p>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button id="btn-edit" class="btn btn-edit">
+                    Редактировать
+                    <img src="./assets/images/icons/lucide--edit.svg" alt="Редактировать" width="24" height="24">
+                </button>
+                <button id="btn-save" class="btn btn-save">
+                    Сохранить
+                    <img src="./assets/images/icons/heroicons-outline--save.svg" alt="Сохранить" width="24" height="24">
+                </button>
+            </div>
+
+            <div class="profile-input">
+                <label>
+                    <input type="text" placeholder="Введите имя "/>
+                </label>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Уведомления, окно -->
+<section id="notifications-window" class="hidden">
+    <div class="field">
+        <h2 class="field__title">Уведомления</h2>
+
+        <div class="notifications-container">
+            <div class="notification">
+                <div class="notification__info">
+                    <p class="notification__device">Кондиционер 436 | Гостиная</p>
+                    <p class="notification__message">Система стабильна</p>
+                </div>
+                <time class="notification__time">12:00</time>
+            </div>
+
+            <div class="notification notification--alert">
+                <div class="notification__info">
+                    <p class="notification__device">Кондиционер 01 | Кухня</p>
+                    <p class="notification__message">Нагрузка нагревателя &gt; 50%</p>
+                </div>
+                <time class="notification__time">16:28</time>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!--
+  - MAIN
+-->
+<main id="content">
+
+</main>
+
+
+<!--
+  - FOOTER
+-->
+
+<div class="footer">
+    <footer>
+        <p class="project-name">BreezeHub</p>
+        <p class="copyright">Аболтусы © 2025</p>
+    </footer>
+</div>
+
+
+
+<!--
+  - js link
+-->
+<script type="module" src="./assets/js/ui/animation.js"></script>
+<script type="module" src="./assets/js/navigation.js"></script>
+<script type="module" src="./assets/js/auth.js"></script>
+<script type="module" src="./assets/js/main.js"></script>
+<script type="module"  src="./assets/js/modal.js"></script>
+<script src="./assets/js/profile.js"></script>
+</body>
+
+</html>
