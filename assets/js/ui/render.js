@@ -82,6 +82,7 @@ export function renderRoomDetail(room) {
   console.log(getComputedStyle(loadCircle).clipPath);
 
   document.getElementById('room-name').innerHTML =  room.name + (room.hasAlert ? ' <span class="alert-icon">⚠️</span>' : '');
+  document.getElementById('room-name').dataset.roomId = room.id;
   document.getElementById('room-temp').textContent = room.temperature;
   document.getElementById('room-co2').textContent = room.co2;
   document.getElementById('room-load').textContent = room.heaterLoad + '%';

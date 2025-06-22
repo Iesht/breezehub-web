@@ -63,7 +63,7 @@ export async function loadRoomById(token, roomId) {
 
     await new Promise(resolve => setTimeout(resolve, 300));
     renderRoomDetail(room);
-
+    console.log('Room loaded:', room);
     // const room = await getRoomById(token, roomId);
     // roomState.setSuccess(room);
     // renderRoomDetail(roomState.data);

@@ -1,6 +1,11 @@
-import {apiCall} from "./api.js";
+import { apiCall } from "./api.js";
+import { assignDevice, getDevices } from './deviceApi.js';
+import { getSensors } from "./sensorApi.js";
 
 // Create room, modal
+
+let acDevices = [];
+let acSensors = [];
 
 document.getElementById('create-room-button').addEventListener('click', openCreateRoomModal);
 
@@ -68,7 +73,7 @@ function saveRoom() {
 
 // Devices, modal
 document.getElementById('add-device-btn').addEventListener('click', openDeviceModal);
-document.getElementById('add-sensor-btn').addEventListener('click', openDeviceModal);
+
 function openDeviceModal(){
   const html=`
     <div class="devices-modal">
@@ -76,22 +81,20 @@ function openDeviceModal(){
       <h2>Доступные устройства</h2>
 
       <div class="section">
-        <h3>Кондиционеры</h3>
         <div class="grid" id="ac-grid"></div>
-      </div>
-
-      <div class="section">
-        <h3>Датчики</h3>
-        <div class="grid" id="sensor-grid"></div>
       </div>
     </div>`;
   const overlay=createOverlay(html);
-  renderDevices('ac-grid', acDevices);
-  renderDevices('sensor-grid', sensorDevices);
+  const token = localStorage.getItem('token');
+  getDevices(token).then(devices => {
+    acDevices = devices;
+    renderDevices('ac-grid', acDevices);
+  });
   overlay.querySelector('.close-btn')
     .addEventListener('click', closeModal);
   overlay.addEventListener('click', e=>{ if(e.target===overlay)closeModal(); });
 }
+
 
 // Логика отрисовки устройств
 function renderDevices(gridId, list) {
@@ -308,31 +311,6 @@ function getDeviceModalHTML(dev) {
 }
 
 /* модалка со списком всех устройств */
-function openDeviceSelectorModal() {
-  const html = `
-    <div class="modal">
-      <button class="close-btn" id="closeBtn">✕</button>
-      <h2>Доступные устройства</h2>
-      <div class="section"><h3>Кондиционеры</h3><div class="grid" id="ac-grid"></div></div>
-      <div class="section"><h3>Датчики</h3><div class="grid" id="sensor-grid"></div></div>
-    </div>`;
-  createOverlay(html);
-
-  renderDevices('ac-grid', acDevices);
-  renderDevices('sensor-grid', sensorDevices);
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-}
-
-
-
-
-
-
-
-
-
-
 
 function showMenu(tileEl, dev) {
   const menu = document.createElement('div');
@@ -349,25 +327,19 @@ function showMenu(tileEl, dev) {
   menu.appendChild(btn);
   tileEl.appendChild(menu);
 }
-function toggleAssign(dev, tileEl) {
-  dev.assigned = !dev.assigned;
-  dev.roomName = dev.assigned ? 'Гостиная' : '';
-  tileEl.classList.toggle('assigned');
-  apiCall('/device/assign', 'PUT', { id: dev.id, assigned: dev.assigned });
-}
 
-const acDevices = [
-  { id: 1, name: 'AC-01', assigned: true },
-  { id: 2, name: 'AC-02', assigned: false },
-  { id: 3, name: 'AC-03', assigned: true },
-  { id: 4, name: 'AC-04', assigned: true }
-];
-const sensorDevices = [
-  { id: 5, name: 'S-01', assigned: false },
-  { id: 6, name: 'S-02', assigned: true },
-  { id: 7, name: 'S-03', assigned: true },
-  { id: 8, name: 'S-04', assigned: true }
-];
+async function toggleAssign(dev, tileEl) {
+  const roomId = document.getElementById('room-name')?.dataset.roomId;
+
+  dev.assigned = !dev.assigned;
+  dev.roomName = dev.assigned ? Number(roomId) : 0;
+  tileEl.classList.toggle('assigned');
+
+  console.log(dev);
+  
+  const token = localStorage.getItem('token');
+  await assignDevice(token, dev);
+}
 
 function createOverlay(htmlInner){
   const overlay=document.createElement('div');

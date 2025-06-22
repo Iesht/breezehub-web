@@ -1,69 +1,94 @@
-import { apiCall } from './api.js'; 
+import { apiCall } from './api.js';
 
-export async function getRooms(token) {
-  const data = await apiCall("/api/me", 'GET', token);
-  
-  const rooms = data.rooms.map((room, index) => {
-  // 1) Собираем все сенсоры из всех устройств комнаты
-  const allSensors = room.devices.flatMap(device => device.sensors);
+const TEMP_MIN = 20;
+const TEMP_MAX = 40;
+const CO2_MIN  = 150;
+const CO2_MAX  = 3000;
 
-  // 2) Считаем средние значения
-  const totalTemp = allSensors.reduce((sum, s) => sum + s.temperature, 0);
-  const totalCo2  = allSensors.reduce((sum, s) => sum + s.co2Level,   0);
-  const count     = allSensors.length;
+/** Вычисляет средние значения температуры и CO₂ по сенсорам */
+function computeAverages(sensors) {
+  const totalTemp = sensors.reduce((sum, s) => sum + s.temperature, 0);
+  const totalCo2 = sensors.reduce((sum, s) => sum + s.co2Level, 0);
+  const count = sensors.length;
 
-  const avgTemp = count ? totalTemp / count : 0;
-  const avgCo2  = count ? totalCo2  / count : 0;
-
-  // 3) Формируем итоговый объект
   return {
-    id: room.roomSystemId,              // или room.roomSystemId, если хотите использовать системный ID
-    name: room.roomName,
-    temperature: Math.round(avgTemp),    // округляем до целого
-    co2: Math.round(avgCo2),
-    heaterLoad: 50,
-    hasAlert: avgCo2 > 1000
-    // heaterLoad, hasAlert добавите позже
+    avgTemp: count ? totalTemp / count : 0,
+    avgCo2: count ? totalCo2 / count : 0,
   };
-});
-
-return rooms;
 }
 
-export async function getRoomById(token, roomId) {
-  const data = await apiCall(`/api/me/rooms/${roomId}`, 'GET', token);
-
-  const allSensors = data.devices.flatMap(device => device.sensors);
-
-  const totalTemp = allSensors.reduce((sum, s) => sum + s.temperature, 0);
-  const totalCo2  = allSensors.reduce((sum, s) => sum + s.co2Level, 0);
-  const count     = allSensors.length;
-
-  const avgTemp = count ? totalTemp / count : 0;
-  const avgCo2  = count ? totalCo2  / count : 0;
+/** Преобразует "room" объект в краткий формат */
+function transformRoomSummary(room) {
+  const allSensors = room.devices.flatMap(d => d.sensors);
+  const { avgTemp, avgCo2 } = computeAverages(allSensors);
 
   return {
-    id: data.roomSystemId,
-    name: data.roomName,
+    id: room.roomSystemId,
+    name: room.roomName,
     temperature: Math.round(avgTemp),
     co2: Math.round(avgCo2),
-    heaterLoad: 50,         // можно заменить на вычисляемое, если будет нужно
-    hasAlert: avgCo2 > 1000, // пример: если высокий CO₂, выводим предупреждение
-    devices: data.devices.map(dev => ({
+    heaterLoad: calculateHeaterLoad(Math.round(avgTemp), Math.round(avgCo2)),
+    hasAlert: avgCo2 > 1000,
+  };
+}
+
+/** Преобразует "room" объект в расширенный формат с devices и sensors */
+function transformRoomDetail(room) {
+  const allSensors = room.devices.flatMap(d => d.sensors);
+  const { avgTemp, avgCo2 } = computeAverages(allSensors);
+
+  return {
+    id: room.roomSystemId,
+    name: room.roomName,
+    temperature: Math.round(avgTemp),
+    co2: Math.round(avgCo2),
+    heaterLoad: calculateHeaterLoad(Math.round(avgTemp), Math.round(avgCo2)),
+    hasAlert: avgCo2 > 1000,
+    devices: room.devices.map(dev => ({
       id: dev.deviceSystemId,
       name: dev.deviceName,
       temperature: dev.sensors.length
         ? Math.round(dev.sensors.reduce((sum, s) => sum + s.temperature, 0) / dev.sensors.length)
         : 0,
-      isOn: true,           // добавь реальные данные при наличии
-      hasTimer: false       // добавь реальные данные при наличии
+      isOn: true,
+      hasTimer: false,
     })),
     sensors: allSensors.map(s => ({
       id: s.sensorSystemId,
-      name: `Сенсор ${s.sensorSystemId}`,        // либо получай название, если оно есть
+      name: `Сенсор ${s.sensorSystemId}`,
       temperature: s.temperature,
       co2: s.co2Level,
-      humidity: 45           // мок-значение, обнови по реальным данным при наличии
-    }))
+      humidity: calculateHumidity(s.temperature, s.co2Level),
+    })),
   };
+}
+
+export async function getRooms(token) {
+  const data = await apiCall("/api/me", 'GET', token);
+  return data.rooms.map(transformRoomSummary);
+}
+
+export async function getRoomById(token, roomId) {
+  const data = await apiCall(`/api/me/rooms/${roomId}`, 'GET', token);
+  return transformRoomDetail(data);
+}
+
+function calculateHumidity(temperature, co2) {
+  const tempRatio = (temperature - TEMP_MIN) / (TEMP_MAX - TEMP_MIN); // от 0 до 1
+  const co2Ratio = (co2 - CO2_MIN) / (CO2_MAX - CO2_MIN); // от 0 до 1
+
+  const drop = (tempRatio + co2Ratio) / 2; // среднее влияние
+  const humidity = 60 - drop * 30; // от 60 до 30
+
+  return Math.round(Math.max(30, Math.min(60, humidity)));
+}
+
+function calculateHeaterLoad(temperature, co2) {
+  const tempRatio = (temperature - TEMP_MIN) / (TEMP_MAX - TEMP_MIN);
+  const co2Ratio = (co2 - CO2_MIN) / (CO2_MAX - CO2_MIN);
+
+  const avgRatio = (tempRatio + co2Ratio) / 2;
+  const heaterLoad = avgRatio * 100;
+
+  return Math.round(Math.max(0, Math.min(100, heaterLoad)));
 }
