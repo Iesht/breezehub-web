@@ -1,6 +1,5 @@
 import { apiCall } from "./api.js";
-import { assignDevice, getDevices } from './deviceApi.js';
-import { getSensors } from "./sensorApi.js";
+import { assignDevice, getDevices, changeModDevice } from './deviceApi.js';
 
 // Create room, modal
 
@@ -128,43 +127,32 @@ export function openDeviceControlModal(dev) {
 
   overlay.querySelector('#closeBtn').addEventListener('click', closeModal);
   /* ——— 4.2 Вкл/выкл питание ——— */
-  powerToggle.addEventListener('click', () => {
-    dev.power = !dev.power;
-    powerToggle.classList.toggle('on');
-    console.log(dev);
-    apiCall('/device/power', 'PUT', { id: dev.id, power: dev.power });
-  });
-
-  /* ——— 4.3 Блок комнат «Добавить / Удалить» ——— */
-  if (dev.assigned) attachRemove(roomBlock.querySelector('.remove-btn'));
-  else               attachAdd   (roomBlock.querySelector('.add-room-btn'));
-
-  function attachRemove(btn) {
-    btn.addEventListener('click', async () => {
-      await apiCall('/device/remove-from-room', 'DELETE', { id: dev.id });
-      dev.assigned = false;
-      dev.roomName = '';
-      roomBlock.replaceWith(getFreeRoomBlock());
-    });
-  }
-  function attachAdd(btn) {
-    btn.addEventListener('click', async () => {
-      await apiCall('/device/add-to-room', 'POST', { id: dev.id, room: 'Гостиная' });
-      dev.assigned = true;
-      dev.roomName = 'Гостиная';
-      roomBlock.replaceWith(getBusyRoomBlock());
-    });
-  }
 
   /* ——— 4.4 Виджеты режима, температуры, графика ——— */
+  console.log(dev);
   overlay.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      overlay.querySelector('.mode-btn.active')?.classList.remove('active');
-      btn.classList.add('active');
-      const mode = btn.querySelector('span').textContent.trim();
-      apiCall('/device/mode', 'PUT', { id: dev.id, mode });
-    });
+  const mode = btn.querySelector('span').textContent.trim();
+
+  // Устанавливаем активную кнопку при загрузке
+  if (mode === dev.mod) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+
+  // Назначаем обработчик на клик
+  btn.addEventListener('click', async () => {
+    overlay.querySelector('.mode-btn.active')?.classList.remove('active');
+    btn.classList.add('active');
+
+    const newMode = btn.querySelector('span').textContent.trim();
+    const token = localStorage.getItem('token');
+    await changeModDevice(token, dev, newMode)
+
+    dev.mode = newMode; // Обновляем локально
   });
+});
+
 
   overlay.querySelectorAll('.round-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -172,7 +160,6 @@ export function openDeviceControlModal(dev) {
       let v = parseInt(target.textContent);
       v += btn.dataset.action === 'increase' ? 1 : -1;
       target.textContent = `${v}°C`;
-      apiCall('/device/target-temp', 'PUT', { id: dev.id, value: v });
     });
   });
 
@@ -212,34 +199,15 @@ export function openDeviceControlModal(dev) {
   });
 
   /* ——— 4.7 Авто-обновление фактической температуры ——— */
-  const actualSpan = overlay.querySelector('.temp-val.actual');
   const tInt = setInterval(() => {
-    apiCall('/device/temp/actual', 'GET', { id: dev.id }).then(r => {
-      /* здесь вместо заглушки обновляем значение */
-      // actualSpan.textContent = r.temp + '°C';
-    });
+    
   }, 30_000);
   overlay.addEventListener('remove', () => clearInterval(tInt));   // сбросить таймер
   /* ——— локальные генераторы блоков ——— */
-  function getBusyRoomBlock() {
-    const b = document.createElement('div');
-    b.className = 'room-block';
-    b.innerHTML = `<span class="room-text">Находится в: ${dev.roomName}</span>
-                   <button class="remove-btn">Удалить</button>`;
-    attachRemove(b.querySelector('.remove-btn'));
-    return b;
-  }
-  function getFreeRoomBlock() {
-    const b = document.createElement('div');
-    b.className = 'room-block';
-    b.innerHTML = `<span class="room-text">Устройство свободно</span>
-                   <button class="add-room-btn">Добавить</button>`;
-    attachAdd(b.querySelector('.add-room-btn'));
-    return b;
-  }
 }
 
 function getDeviceModalHTML(dev) {
+  console.log(dev);
   return `
   <div class="modal">
     <button class="close-btn" id="closeBtn">✕</button>
@@ -247,23 +215,14 @@ function getDeviceModalHTML(dev) {
       <h2 id="deviceTitle">${dev.name}
         <span class="toggle ${dev.power ? 'on' : ''}" id="togglePower"></span>
       </h2>
-
-      <div class="room-block" id="roomBlock">
-        ${dev.assigned
-    ? `<span class="room-text">Находится в: ${dev.roomName}</span>
-             <button class="remove-btn">Удалить</button>`
-    : `<span class="room-text">Устройство свободно</span>
-             <button class="add-room-btn">Добавить</button>`}
-      </div>
-
       <!-- ==== MODE WIDGET ==== -->
       <div class="widget mode-widget">
         <h3>Режим работы</h3>
         <div class="modes">
-          <button class="mode-btn active"><span>Тихий</span></button>
-          <button class="mode-btn"><span>Обычный</span></button>
-          <button class="mode-btn"><span>Сильный</span></button>
-          <button class="mode-btn"><span>Турбо</span></button>
+          <button class="mode-btn"><span>quiet</span></button>
+          <button class="mode-btn"><span>normal</span></button>
+          <button class="mode-btn"><span>strong</span></button>
+          <button class="mode-btn"><span>turbo</span></button>
         </div>
 
         <div class="schedule-header">

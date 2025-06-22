@@ -52,6 +52,7 @@ function transformRoomDetail(room) {
         : 0,
       isOn: dev.mod !== "off",
       hasTimer: false,
+      mod: dev.mod,
     })),
     sensors: allSensors.map(s => ({
       id: s.sensorSystemId,

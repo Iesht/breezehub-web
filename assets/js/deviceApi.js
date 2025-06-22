@@ -58,3 +58,9 @@ export async function powerDevice(token, device) {
     console.log(myDevice);
     return await updateDevice(token, myDevice.name, myDevice.id, myDevice.roomId, device.isOn ? 2: 0)
 }
+
+export async function changeModDevice(token, device, mod) {
+    const myDevice = await getDeviceById(token, device.id);
+    console.log(myDevice);
+    return await updateDevice(token, myDevice.name, myDevice.id, myDevice.roomId, Mode[mod])
+}
