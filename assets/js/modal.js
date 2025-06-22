@@ -1,5 +1,7 @@
 import {apiCall} from "./api.js";
 
+// Create room, modal
+
 document.getElementById('create-room-button').addEventListener('click', openCreateRoomModal);
 
 function openCreateRoomModal() {
@@ -7,7 +9,7 @@ function openCreateRoomModal() {
   overlay.classList.add('modal-overlay');
   overlay.innerHTML = `
     <div class="modal">
-      <span class="close-btn" onclick="closeModal()">×</span>
+      <span class="close-btn">×</span>
       <h2>Новая комната</h2>
 
       <div class="input-group">
@@ -35,6 +37,8 @@ function openCreateRoomModal() {
   document.body.appendChild(overlay);
 
   overlay.querySelector('.save-btn').addEventListener('click', saveRoom);
+  overlay.querySelector('.close-btn')
+    .addEventListener('click', closeModal);
   overlay.querySelector('#roomList').addEventListener('click', function(e) {
     if (e.target && e.target.nodeName === 'DIV') {
       document.getElementById('roomNameInput').value = e.target.textContent;
@@ -62,12 +66,13 @@ function saveRoom() {
 
 
 
-//2
+// Devices, modal
 document.getElementById('add-device-btn').addEventListener('click', openDeviceModal);
+document.getElementById('add-sensor-btn').addEventListener('click', openDeviceModal);
 function openDeviceModal(){
   const html=`
     <div class="devices-modal">
-      <span class="close-btn" onclick="closeModal()">×</span>
+      <span class="close-btn">×</span>
       <h2>Доступные устройства</h2>
 
       <div class="section">
@@ -83,19 +88,24 @@ function openDeviceModal(){
   const overlay=createOverlay(html);
   renderDevices('ac-grid', acDevices);
   renderDevices('sensor-grid', sensorDevices);
+  overlay.querySelector('.close-btn')
+    .addEventListener('click', closeModal);
   overlay.addEventListener('click', e=>{ if(e.target===overlay)closeModal(); });
 }
 
-// ===== Логика отрисовки устройств =====
+// Логика отрисовки устройств
 function renderDevices(gridId, list) {
   const grid = document.getElementById(gridId);
+  if (!grid) {
+    console.warn(`Элемент с id="${gridId}" не найден!`);
+    return;
+  }
   grid.innerHTML = '';
   list.forEach(dev => {
     const tile = document.createElement('div');
     tile.className = 'device' + (dev.assigned ? ' assigned' : '');
     tile.textContent = dev.name;
 
-    /* Старое меню «добавить | удалить» */
     tile.addEventListener('click', e => {
       e.stopPropagation();
       closeMenus();
@@ -172,10 +182,10 @@ export function openDeviceControlModal(dev) {
     const slot = document.createElement('div');
     slot.className = 'edit-slot';
     slot.innerHTML = `
-      <span>c</span><input type="time" class="start" value="${t1}">
+      <span>с</span><input type="time" class="start" value="${t1}">
       <span>до</span><input type="time" class="end" value="${t2}">
       <button class="ok-btn">ok</button>
-      <button class="del">🗑️</button>
+      <button class="del"><img src="/assets/images/icons/lineicons--trash-3.svg" alt="Удалить"</button>
     `;
     slot.querySelector('.del').onclick = () => slot.remove();
     slot.querySelector('.ok-btn').onclick = () => {
@@ -225,7 +235,6 @@ export function openDeviceControlModal(dev) {
   }
 }
 
-/* ==== 5. Генератор HTML для большой модалки =========================== */
 function getDeviceModalHTML(dev) {
   return `
   <div class="modal">
@@ -269,7 +278,6 @@ function getDeviceModalHTML(dev) {
         </div>
       </div>
 
-      <!-- ==== TEMPERATURE WIDGET ==== -->
       <div class="widget temp-widget">
         <h3>Температура</h3>
         <div class="temp-box">
@@ -289,7 +297,6 @@ function getDeviceModalHTML(dev) {
         </div>
       </div>
 
-      <!-- ==== ALERTS WIDGET ==== -->
       <div class="widget alerts-widget">
         <h3>Тревоги</h3>
         <div class="alert-box">
@@ -300,18 +307,7 @@ function getDeviceModalHTML(dev) {
   </div>`;
 }
 
-/* ==== 7. Инициализация страницы ======================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  /* рендер начальной сетки устройств */
-  renderDevices('ac-grid',     acDevices);
-  renderDevices('sensor-grid', sensorDevices);
-
-  /* если нужен «плюсик» для отдельного окна устройств */
-  const btn = document.getElementById('add-device-btn');
-  if (btn) btn.addEventListener('click', openDeviceSelectorModal);
-});
-
-/* ==== 8. (опционально) модалка со списком всех устройств ============== */
+/* модалка со списком всех устройств */
 function openDeviceSelectorModal() {
   const html = `
     <div class="modal">
@@ -388,5 +384,6 @@ function closeMenus() { document.querySelectorAll('.tile-menu').forEach(m => m.r
 
 function closeModal() {
   document.querySelector('.modal-overlay')?.remove();
+  document.querySelector('.modal')?.remove();
   closeMenus();
 }
