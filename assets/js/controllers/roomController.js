@@ -42,7 +42,7 @@ export async function loadAllRooms(token) {
     //   { id: 2, name: 'Кухня',   temperature: 25, co2: 2000, heaterLoad: 30, hasAlert: true }
     // ];
     roomState.setSuccess(rooms);
-    renderRooms(roomState.data, roomId => loadRoomById('mock-token', roomId));
+    renderRooms(roomState.data, roomId => loadRoomById(token, roomId));
     console.log('Rooms loaded:', rooms);
   } catch (e) {
     roomState.setError(e.message);
@@ -58,11 +58,7 @@ export async function loadRoomById(token, roomId) {
   renderLoading(true);
 
   try {
-    const mockRooms = [
-      { id: 1, name: 'Гостиная', temperature: 22, co2: 450, heaterLoad: 60 },
-      { id: 2, name: 'Кухня',   temperature: 25, co2: 2000, heaterLoad: 30, hasAlert: true }
-    ];
-    const room = mockRooms.find(r => r.id === roomId);
+    const room = await getRoomById(token, roomId);
     if (!room) throw new Error('Комната не найдена');
 
     await new Promise(resolve => setTimeout(resolve, 300));

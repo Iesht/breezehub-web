@@ -85,6 +85,14 @@ export function renderRoomDetail(room) {
   document.getElementById('room-temp').textContent = room.temperature;
   document.getElementById('room-co2').textContent = room.co2;
   document.getElementById('room-load').textContent = room.heaterLoad + '%';
+
+  const devContainer = document.getElementById('devices');
+  devContainer.innerHTML = ''; // очищаем старые
+  room.devices?.forEach(d => devContainer.appendChild(createDeviceCard(d)));
+
+  const sensContainer = document.getElementById('sensors');
+  sensContainer.innerHTML = '';
+  room.sensors?.forEach(s => sensContainer.appendChild(createSensorCard(s)));
 }
 
 document.getElementById('room-back').addEventListener('click', () => {
@@ -112,29 +120,6 @@ function adjustAllButtons() {
   window.addEventListener(event, adjustAllButtons)
 );
 document.addEventListener('DOMContentLoaded', adjustAllButtons);
-
-
-/* === Заглушка «базы данных» === */
-function fetchFromDB(){
-  return new Promise(resolve=>{
-    setTimeout(()=>{
-      resolve({
-        devices:[
-          {id:1,name:'Холодильник',temperature:14,isOn:true,hasTimer:false},
-          {id:2,name:'Котельная',temperature:14,isOn:true,hasTimer:true},
-          {id:3,name:'Кондиционер',temperature:14,isOn:false,hasTimer:false}
-        ],
-        sensors:[
-          {id:1,name:'Гостиная',temperature:14,humidity:45,co2:400},
-          {id:2,name:'Спальня',temperature:14,humidity:45,co2:2500},
-          {id:3,name:'Кухня',temperature:14,humidity:45,co2:600},
-          {id:4,name:'Детская',temperature:14,humidity:45,co2:2500},
-          {id:5,name:'Кабинет',temperature:14,humidity:45,co2:2500}
-        ]
-      });
-    },400);
-  });
-}
 
 // Устройства
 function createDeviceCard(dev){
@@ -199,16 +184,3 @@ function wireAddButtons(){
     alert('TODO: форма добавления датчика');
   });
 }
-
-(async function init(){
-  const {devices,sensors}=await fetchFromDB();
-  const devContainer=document.getElementById('devices');
-  const sensContainer=document.getElementById('sensors');
-
-  devices.forEach(d=>devContainer.appendChild(createDeviceCard(d)));
-  sensors.forEach(s=>sensContainer.appendChild(createSensorCard(s)));
-
-  enableToggleKeyboard();
-  wireAddButtons();
-})();
-
