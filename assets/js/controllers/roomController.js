@@ -36,11 +36,11 @@ export async function loadAllRooms(token) {
   renderLoading(true);
 
   try {
-    // const rooms = await getRooms(token);
-    const rooms = [
-      { id: 1, name: 'Гостиная', temperature: 22, co2: 450, heaterLoad: 60 },
-      { id: 2, name: 'Кухня',   temperature: 25, co2: 2000, heaterLoad: 30, hasAlert: true }
-    ];
+    const rooms = await getRooms(token);
+    // const rooms = [
+    //   { id: 1, name: 'Гостиная', temperature: 22, co2: 450, heaterLoad: 60 },
+    //   { id: 2, name: 'Кухня',   temperature: 25, co2: 2000, heaterLoad: 30, hasAlert: true }
+    // ];
     roomState.setSuccess(rooms);
     renderRooms(roomState.data, roomId => loadRoomById('mock-token', roomId));
     console.log('Rooms loaded:', rooms);

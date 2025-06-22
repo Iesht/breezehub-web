@@ -3,9 +3,9 @@ import {openAuthWindow} from "./auth.js";
 
 // Старт
 document.addEventListener('DOMContentLoaded', () => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  if (isLoggedIn) {
-    loadAllRooms();
+  const token = localStorage.getItem('token');
+  if (token !== null) {
+    loadAllRooms(token);
   } else {
     openAuthWindow();
   }

@@ -1,4 +1,5 @@
 import {openMain, showWindow} from "./navigation.js";
+import { apiCall } from './api.js';
 
 export async function openAuthWindow() {
  showWindow('auth-window');
@@ -10,32 +11,34 @@ export async function openAuthWindow() {
     e.preventDefault();
 
     const login = document.getElementById('auth-login').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
 
-    if (login === '') {
-      alert('Введите ключ.');
-      return;
-    }
-
-    if (login !== 'admin') {
-      alert('Неправильный ключ. У вас нет доступа.');
+    if (login === '' || password === '') {
+      alert('Введите данные.');
       return;
     }
 
     try {
+        const response = await apiCall("auth/login", "POST", "", { username: login, password: password });
 
-      console.log(`Авторизация успешна: ${login}`);
-      localStorage.setItem('isLoggedIn', 'true');
-      document.getElementById('site-header').classList.remove('hidden');
-      openMain();
-    } catch (error) {
-      console.error(error);
-      alert('Ошибка авторизации');
-    }
+        const token = response.message;
+        localStorage.setItem('token', token);
+
+        console.log('Успешный вход. Токен:', token);
+
+        localStorage.setItem('token', token);
+        document.getElementById('site-header').classList.remove('hidden');
+        openMain();
+
+        } catch (error) {
+          console.error(error);
+          alert('Неверный логин или пароль');
+        }
   }, { once: true });  // Важно: { once: true } — чтобы обработчик добавился 1 раз
 }
 
 function logout() {
-  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('token');
   openAuthWindow();
 }
 

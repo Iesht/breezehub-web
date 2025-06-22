@@ -1090,6 +1090,7 @@ html {
 
 .auth-form input {
     border: 1px solid #ccc;
+    margin-bottom: 20px;
 }
 
 .auth-form button {
@@ -1097,7 +1098,7 @@ html {
     color: #fff;
     border: none;
     cursor: pointer;
-    margin-top: 25px;
+    margin-top: 5px;
 }
 
 .auth-form button:hover {
