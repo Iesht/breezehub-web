@@ -1,7 +1,7 @@
 import { apiCall } from './api.js';
 
 
-const Mode = {
+export const Mode = {
     off: 0,
     quiet: 1,
     normal: 2,

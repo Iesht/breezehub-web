@@ -152,7 +152,7 @@ function createDeviceCard(dev) {
     const newState = !prevState;
 
     // Обновим UI "на глаз" — feel fast
-    updateToggleUI(toggle, statusLabel, newState);
+    updateToggleUI(toggle, newState);
 
     try {
       const token = localStorage.getItem('token');
@@ -162,7 +162,7 @@ function createDeviceCard(dev) {
       // Если ошибка — вернуть в предыдущее состояние
       console.error("Ошибка при переключении устройства:", e);
       dev.isOn = prevState;
-      updateToggleUI(toggle, statusLabel, prevState);
+      updateToggleUI(toggle, prevState);
     } finally {
       toggle.classList.remove('disabled');
     }
@@ -177,9 +177,8 @@ function createDeviceCard(dev) {
   return card;
 }
 
-function updateToggleUI(toggle, label, isOn) {
+function updateToggleUI(toggle, isOn) {
   toggle.classList.toggle('off', !isOn);
-  label.textContent = isOn ? 'ON' : 'OFF';
 }
 
 

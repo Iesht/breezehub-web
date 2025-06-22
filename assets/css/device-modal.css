@@ -1,0 +1,381 @@
+/* Добавление устройств, modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .5);
+    padding: var(--space);
+}
+
+.modal {
+    max-width: 600px;
+    width: 100%;
+    padding: var(--space);
+    background: var(--c-bg);
+    border-radius: 12px;
+    max-height: calc(100vh - var(--space) * 2);
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+}
+
+
+/* Breakpoints */
+@media (max-width: 1024px) {
+    .modal {
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    h2 {
+        font-size: clamp(22px, 6vw, 28px);
+    }
+
+    .widget {
+        padding: 16px;
+    }
+
+    .modes {
+        gap: 16px;
+    }
+
+    .mode-btn {
+        width: 64px;
+        height: 64px;
+    }
+
+    .room-block, .widget {
+        border-radius: 12px;
+    }
+
+    .close-btn {
+        top: 12px;
+        right: 12px;
+        font-size: 20px;
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    color: var(--c-text);
+}
+
+h2 {
+    margin: 0 0 24px;
+    font-weight: 600;
+    color: var(--c-dark-blue);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: clamp(24px, 2.4vw, 32px);
+}
+
+.toggle.on {
+    background: var(--c-blue);
+}
+
+.room-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    background: var(--c-bg);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 24px;
+}
+
+.room-text {
+    font-size: 16px;
+    color: var(--c-dark-blue);
+}
+
+.remove-btn,
+.add-room-btn {
+    background: var(--c-dark-blue);
+    color: var(--c-bg);
+    border: none;
+    border-radius: 9999px;
+    padding: 6px 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.remove-btn:hover,
+.add-room-btn:hover {
+    background: #00172a;
+}
+
+/* Виджет */
+.widget {
+    width: 100%;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.widget h3 {
+    margin: 0 0 20px;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Режимы работы, виджет */
+.modes {
+    width: 400px;
+    display: flex;
+    gap: 24px;
+    margin: 0 auto 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    width: 72px;
+    height: 72px;
+    border: none;
+    border-radius: 50%;
+    background: var(--c-grey);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.mode-btn.active {
+    background: var(--c-blue);
+    color: black;
+}
+
+.mode-btn .icon {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+}
+
+.mode-btn span {
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+/* Расписание работы, виджет */
+.schedule-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.schedule-header .title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    background: var(--c-grey);
+    border-radius: 34px;
+    transition: var(--transition);
+}
+
+.slider:before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--c-bg);
+    transition: var(--transition);
+}
+
+.switch input:checked + .slider {
+    background: var(--c-blue);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.add-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--c-dark-blue);
+    color: var(--c-bg);
+    font-size: 20px;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.schedule-list {
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-right: 6px;
+}
+
+.time-slot {
+    background: var(--c-grey);
+    border-radius: 22px;
+    padding: 6px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Редактор времени */
+#schedule-edit-zone {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--c-grey);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.edit-slot input[type="time"] {
+    width: 80px;
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 14px;
+}
+
+.edit-slot .ok-btn {
+    background: var(--c-orange);
+    border: none;
+    border-radius: 50px;
+    padding: 6px 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-slot .del {
+    font-size: 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Задание температуры, виджет */
+.temp-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.set-temp, .actual-temp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.label {
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.adjust {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.round-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: var(--c-grey-muted);
+    font-size: 24px;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.round-btn:hover {
+    background: var(--c-grey);
+}
+
+.temp-val {
+    font-size: 42px;
+    font-weight: 500;
+}
+
+/* Тревоги, виджет */
+.alert-box {
+    padding: 38px 24px;
+    text-align: center;
+    font-size: 20px;
+    color: var(--c-grey);
+}
+
+.alert-box.warning {
+    border-color: var(--c-orange);
+    background: rgba(255, 165, 0, .06);
+    color: var(--c-orange);
+}
+
+.alert-box.danger {
+    border-color: #ff3b30;
+    background: rgba(255, 59, 48, .06);
+    color: #ff3b30;
+}
+
+.alert-box.success {
+    border-color: #34c759;
+    background: rgba(52, 199, 89, .06);
+    color: #34c759;
+}
