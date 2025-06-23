@@ -372,6 +372,38 @@ html {
     border-radius: 50%;
     background: var(--c-blue);
     margin: 0 16px;
+
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.knob .icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    margin: 0;
+}
+
+.iot-panel .knob::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+.iot-panel .knob:hover::after {
+    opacity: 1;
 }
 
 .iot-panel .toggle {
@@ -559,7 +591,7 @@ html {
     position: absolute;
     width: 131px;
     height: 131px;
-    background: #ff7d24;
+    background: var(--c-orange);
     border-radius: 50%;
     top: 0;
     left: 0;
@@ -664,7 +696,7 @@ html {
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #f26b2f;
+    color: var(--c-orange);
     opacity: 0.5;
     user-select: none;
 }
@@ -719,10 +751,18 @@ html {
 
 .auth-form input {
     border: 1px solid #ccc;
+    margin-top: 10px;
+    transition: border-color .2s;
+}
+
+
+.auth-form input:focus {
+    border-color: #97E6FF;
+    outline: none;
 }
 
 .auth-form button {
-    background-color: #082B45;
+    background-color: var(--c-dark-blue);
     color: var(--c-bg);
     border: none;
     cursor: pointer;
@@ -826,7 +866,7 @@ html {
 }
 
 #profile-window button.editing {
-    background-color: #FF7D24;
+    background-color: var(--c-orange);
 }
 
 #profile-window .field.editing .btn-save {
@@ -841,7 +881,7 @@ html {
 }
 
 #profile-window .field.editing .btn-edit {
-    background: #FF7D24;
+    background: var(--c-orange);
     color: #000;
 }
 
@@ -1049,7 +1089,7 @@ html {
 #site-header .logo {
     font-size: 1.25rem;
     font-weight: 200;
-    color: #FF7D24;
+    color: var(--c-orange);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1072,8 +1112,8 @@ html {
     padding: 0.5rem 1rem;
     font-size: 16px;
     border-radius: 50px;
-    border: 1px solid #B8B8B8;
-    background-color: white;
+    border: 1px solid var(--c-border);
+    background-color: var(--c-bg);
     color: black;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
@@ -1100,7 +1140,7 @@ html {
 }
 
 #header-actions button.active {
-    background-color: #FF7D24;
+    background-color: var(--c-orange);
 }
 
 .btn-icon {
